@@ -1,0 +1,22 @@
+{
+  "name": "elysium/api",
+  "description": "API moderna e futurista para integração com o sistema Elysium",
+  "type": "library",
+  "version": "1.1.0",
+  "require": {
+    "php": ">=7.4",
+    "guzzlehttp/guzzle": "^7.0"
+  },
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Elysium\\Api\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Elysium API"
+    }
+  ],
+  "minimum-stability": "stable"
+}
