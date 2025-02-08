@@ -2,11 +2,6 @@
 
 namespace Elysium\Api;
 
-require_once __DIR__ . '/Clients.php';
-require_once __DIR__ . '/Plans.php';
-require_once __DIR__ . '/Messages.php';
-require_once dirname(__DIR__) . '/vendor/autoload.php';
-
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 
