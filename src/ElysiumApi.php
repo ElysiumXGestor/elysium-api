@@ -2,6 +2,11 @@
 
 namespace Elysium\Api;
 
+require_once __DIR__ . '/Clients.php';
+require_once __DIR__ . '/Plans.php';
+require_once __DIR__ . '/Messages.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 
@@ -23,11 +28,7 @@ class ElysiumApi
         
         $this->client = new Client([
             'base_uri' => $this->baseURL,
-            'headers' => [
-                'Content-Type' => 'application/json',
-                'email' => $this->email,
-                'hash' => $this->hash
-            ]
+            'headers' => $this->getHeaders()
         ]);
 
         $this->clients = new Clients($this);
@@ -35,12 +36,21 @@ class ElysiumApi
         $this->messages = new Messages($this);
     }
 
-    public function getClient(): Client
+    public function getHeaders(): array
+    {
+        return [
+            'Content-Type' => 'application/json',
+            'email' => $this->email,
+            'hash' => $this->hash
+        ];
+    }
+
+    public function getHttpClient(): Client
     {
         return $this->client;
     }
 
-    // Métodos para clientes
+    // API de Clientes
     public function createClient(array $data): array
     {
         return $this->clients->create($data);
@@ -66,10 +76,10 @@ class ElysiumApi
         return $this->clients->get($data);
     }
 
-    // Métodos para planos
-    public function createPlan(array $data): array
+    // API de Planos
+    public function listPlans(array $params = []): array
     {
-        return $this->plans->create($data);
+        return $this->plans->list($params);
     }
 
     public function updatePlan(string $planId, array $data): array
@@ -77,12 +87,12 @@ class ElysiumApi
         return $this->plans->update($planId, $data);
     }
 
-    public function listPlans(array $params = []): array
+    public function createPlan(array $data): array
     {
-        return $this->plans->list($params);
+        return $this->plans->create($data);
     }
 
-    // Métodos para mensagens
+    // API de Mensagens
     public function sendMessagePlan(array $data): array
     {
         return $this->messages->sendAllPlan($data);
@@ -93,12 +103,12 @@ class ElysiumApi
         return $this->messages->sendSingle($data);
     }
 
-    protected function handleError($error): array
+    public function handleError($error): array
     {
         if ($error instanceof GuzzleException) {
             $response = $error->getResponse();
             $status = $response ? $response->getStatusCode() : 500;
-            $data = $response ? json_decode($response->getBody(), true) : [];
+            $data = $response ? json_decode($response->getBody(), true) : null;
 
             $errorMessages = [
                 400 => 'Requisição inválida',
@@ -112,14 +122,22 @@ class ElysiumApi
             return [
                 'status' => $status,
                 'message' => $data['error'] ?? $errorMessages[$status] ?? 'Erro desconhecido',
-                'details' => $data['details'] ?? $data
+                'details' => $data['details'] ?? $data ?? []
+            ];
+        }
+
+        if ($error->getCode() === 'ECONNREFUSED') {
+            return [
+                'status' => 503,
+                'message' => 'Servidor indisponível',
+                'details' => 'Não foi possível conectar ao servidor'
             ];
         }
 
         return [
-            'status' => 500,
+            'status' => $error->getCode() ?? 500,
             'message' => $error->getMessage() ?? 'Erro interno na API',
-            'details' => 'Erro desconhecido'
+            'details' => $error->getCode() ?? 'Erro desconhecido'
         ];
     }
 }

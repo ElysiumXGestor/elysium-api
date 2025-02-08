@@ -17,6 +17,5 @@
       "name": "Elysium API",
       "email": "seu-email@exemplo.com"
     }
-  ],
-  "minimum-stability": "stable"
+  ]
 }
