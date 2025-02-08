@@ -4,7 +4,6 @@ namespace Elysium\Api;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
-
 class ElysiumApi
 {
     private string $email;
